@@ -1,0 +1,257 @@
+-- [[ DAVI-XIT PREMIUM V28 - SEPARADO ]] --
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService") -- Adicionado para o arrasto
+local SaveTime = "DaviXit_Time.txt"
+local SaveUsed = "DaviXit_UsedKeys.txt"
+local SaveGenerated = "DaviXit_ChavesGeradas.txt"
+
+local function Save(n, c) if writefile then writefile(n, tostring(c)) end end
+local function Read(n) if isfile and isfile(n) then return readfile(n) end return nil end
+
+local function ResetHitboxes()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local head = p.Character:FindFirstChild("Head")
+            if head then
+                head.Size = Vector3.new(1, 1, 1)
+                head.Transparency = 0
+                head.CanCollide = true
+                head.Massless = false
+            end
+        end
+    end
+end
+
+local function ResetAntenas()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local root = p.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                for _, child in pairs(root:GetChildren()) do
+                    if child.Name == "SkyBeam" or child:IsA("Attachment") then
+                        child:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function CreateUI()
+    local sg = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+    sg.Name = "DaviXitPro"
+    sg.ResetOnSpawn = false
+
+    local Main = Instance.new("Frame", sg)
+    Main.Size = UDim2.new(0, 320, 0, 160)
+    Main.Position = UDim2.new(0.5, -160, 0.4, 0)
+    Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Main.BorderSizePixel = 0
+    Main.Active = true Main.Draggable = true
+    local s = Instance.new("UIStroke", Main) s.Color = Color3.fromRGB(255, 255, 255) s.Thickness = 1
+    Instance.new("UICorner", Main)
+
+    local Title = Instance.new("TextLabel", Main)
+    Title.Size = UDim2.new(1, 0, 0, 45)
+    Title.Text = "DAVI-XIT | V28 OTIMIZADO"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.GothamBold
+    Title.BackgroundTransparency = 1
+
+    local Input = Instance.new("TextBox", Main)
+    Input.Size = UDim2.new(0, 260, 0, 40)
+    Input.Position = UDim2.new(0.5, -130, 0.35, 0)
+    Input.PlaceholderText = "INSIRA SUA KEY..."
+    Input.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Input.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", Input)
+
+    local Btn = Instance.new("TextButton", Main)
+    Btn.Size = UDim2.new(0, 260, 0, 35)
+    Btn.Position = UDim2.new(0.5, -130, 0.7, 0)
+    Btn.Text = "ATIVAR CHEAT"
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", Btn)
+
+    local TimerLabel = Instance.new("TextLabel", sg)
+    TimerLabel.Size = UDim2.new(0, 400, 0, 40)
+    TimerLabel.Position = UDim2.new(0.5, -200, 0, 60)
+    TimerLabel.BackgroundTransparency = 1
+    TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TimerLabel.Font = Enum.Font.GothamBold
+    TimerLabel.TextSize = 22
+    TimerLabel.Visible = false
+    TimerLabel.Active = true -- Necessário para registrar cliques no TextLabel
+
+    -- [ CÓDIGO PARA ARRASTAR O CRONÔMETRO ]
+    local dragging, dragInput, dragStart, startPos
+    
+    local function update(input)
+        local delta = input.Position - dragStart
+        TimerLabel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+    
+    TimerLabel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = TimerLabel.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    TimerLabel.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+    -- [ FIM DO CÓDIGO DE ARRASTO ]
+
+    local scriptAtivo = false
+
+    local function StartSystem(seconds, keyUsada)
+        Main.Visible = false
+        TimerLabel.Visible = true
+        scriptAtivo = true
+        local timeLeft = seconds
+        
+        task.spawn(function()
+            while scriptAtivo do
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character then
+                        local head = p.Character:FindFirstChild("Head")
+                        if head and head.Size.Y ~= 8 then
+                            head.Size = Vector3.new(8, 8, 8)
+                            head.Transparency = 0.7 
+                            head.CanCollide = false
+                            head.Massless = true 
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+
+        task.spawn(function()
+            while scriptAtivo do
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character then
+                        local root = p.Character:FindFirstChild("HumanoidRootPart")
+                        local head = p.Character:FindFirstChild("Head")
+                        
+                        if root and head and not root:FindFirstChild("SkyBeam") then
+                            local a0 = Instance.new("Attachment", root)
+                            local a1 = Instance.new("Attachment", root)
+                            a1.Position = Vector3.new(0, 500, 0)
+                            
+                            local beam = Instance.new("Beam", root)
+                            beam.Name = "SkyBeam"
+                            beam.Attachment0 = a0
+                            beam.Attachment1 = a1
+                            beam.Width0 = 4 
+                            beam.Width1 = 4
+                            beam.FaceCamera = true
+                            
+                            local bc = p.Character:FindFirstChild("Body Colors")
+                            local color = bc and bc.HeadColor3 or head.Color
+                            beam.Color = ColorSequence.new(color)
+                        end
+                    end
+                end
+                task.wait(2)
+            end
+        end)
+
+        task.spawn(function()
+            while true do
+                if seconds >= 9000000 then 
+                    TimerLabel.Text = "ACESSO PERMANENTE" 
+                    break 
+                end
+                
+                if timeLeft <= 0 then
+                    scriptAtivo = false 
+                    Save(SaveTime, "0")
+                    
+                    if keyUsada ~= "RELOGIN" then
+                        local usadas = Read(SaveUsed) or ""
+                        Save(SaveUsed, usadas .. ";" .. keyUsada)
+                    end
+                    
+                    ResetHitboxes()
+                    ResetAntenas()
+                    
+                    TimerLabel.Visible = false
+                    Input.Text = ""
+                    Btn.Text = "KEY EXPIRADA! INSIRA OUTRA"
+                    Main.Visible = true
+                    break
+                end
+                
+                Save(SaveTime, timeLeft)
+                
+                local d = math.floor(timeLeft / 86400)
+                local h = math.floor((timeLeft % 86400) / 3600)
+                local m = math.floor((timeLeft % 3600) / 60)
+                local s = timeLeft % 60
+                TimerLabel.Text = string.format("EXPIRA EM: %02dd %02dh %02dm %02ds", d, h, m, s)
+                
+                timeLeft = timeLeft - 1
+                task.wait(1)
+            end
+        end)
+    end
+
+    Btn.MouseButton1Click:Connect(function()
+        local txt = string.gsub(Input.Text, "^%s*(.-)%s*$", "%1"):lower()
+        
+        if txt == "" then 
+            Btn.Text = "DIGITE ALGO" 
+            return 
+        end
+        
+        local usadas = (Read(SaveUsed) or ""):lower()
+        if string.find(usadas, txt, 1, true) then 
+            Btn.Text = "CHAVE JÁ EXPIRADA / INVÁLIDA" 
+            return 
+        end
+        
+        local chavesPermitidas = (Read(SaveGenerated) or ""):lower()
+        local chaveValidaDoPainel = string.find(chavesPermitidas, txt, 1, true) ~= nil
+        
+        local t = 0
+        if string.find(txt, "davi%-xiter%-30s") and chaveValidaDoPainel then t = 30 
+        elseif string.find(txt, "davi%-xiter%-14dias") and chaveValidaDoPainel then t = 1209600 
+        elseif string.find(txt, "davi%-xiter%-15dias") and chaveValidaDoPainel then t = 1296000 
+        elseif string.find(txt, "davi%-xiter%-30dias") and chaveValidaDoPainel then t = 2592000
+        elseif string.find(txt, "davi%-xiter%-perm") and chaveValidaDoPainel then t = 9999999 end
+        
+        if t > 0 then 
+            Save(SaveTime, t) 
+            StartSystem(t, txt) 
+        else 
+            Btn.Text = "CHAVE INCORRETA" 
+        end
+    end)
+
+    local saved = tonumber(Read(SaveTime))
+    if saved and saved > 0 then 
+        StartSystem(saved, "RELOGIN") 
+    end
+end
+
+pcall(CreateUI)
